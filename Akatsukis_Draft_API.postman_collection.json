@@ -1,0 +1,411 @@
+{
+  "info": {
+    "_postman_id": "b18b63e5-8a8b-4a6c-9bc7-akatsuki2026",
+    "name": "Akatsuki's Draft: AI-Enabled Content Sharing Platform API",
+    "description": "Complete Postman API Collection for Nodevember 4.0 Backend Task.\nIncludes Authentication, Post Management, Admin Approval, and Google Gemini AI Content Improvement.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('authToken', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Itachi Uchiha\",\n  \"email\": \"itachi@akatsuki.dev\",\n  \"password\": \"Mangekyo@2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user. Public registration always creates a 'user' role."
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('authToken', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"itachi@akatsuki.dev\",\n  \"password\": \"Mangekyo@2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate user and receive JWT token."
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set('adminToken', res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@akatsuki.dev\",\n  \"password\": \"Admin@SecurePassword2026\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate admin user and store adminToken."
+          }
+        },
+        {
+          "name": "Get Current User Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get current logged-in user profile from JWT Bearer token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User Post Management",
+      "item": [
+        {
+          "name": "Create Post (Submit for Approval)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data._id) {",
+                  "    pm.collectionVariables.set('postId', res.data._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Will of Fire and the Shadows\",\n  \"description\": \"An essay on the nature of peace through perspective.\",\n  \"content\": \"people live their lives bound by what they accept as correct and true. that is how they define reality. but what does it mean to be correct or true? merely vague concepts... their reality may all be a mirage. can we consider them to simply be living in their own world, shaped by their beliefs?\",\n  \"category\": \"Philosophy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Create a post submitted for review (status: pending)."
+          }
+        },
+        {
+          "name": "Create Post (Save as Draft)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unfinished Notes on Genjutsu\",\n  \"description\": \"Draft observations on Tsukuyomi.\",\n  \"content\": \"Time, space, and mass can all be bent to the caster will...\",\n  \"category\": \"Techniques\",\n  \"status\": \"draft\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"]
+            },
+            "description": "Save a post as draft (status: draft)."
+          }
+        },
+        {
+          "name": "Get Public Posts Feed",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "category", "value": "Philosophy", "disabled": true },
+                { "key": "search", "value": "peace", "disabled": true }
+              ]
+            },
+            "description": "Public feed: returns ONLY approved posts. Drafts, pending, and rejected posts are never returned."
+          }
+        },
+        {
+          "name": "Get Approved Post by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Returns approved post by ID. Non-approved posts return 404."
+          }
+        },
+        {
+          "name": "Get My Posts & Drafts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posts/my-posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "my-posts"],
+              "query": [
+                { "key": "status", "value": "draft", "disabled": true }
+              ]
+            },
+            "description": "Returns all posts created by authenticated user, including drafts, pending, approved, and rejected."
+          }
+        },
+        {
+          "name": "Update My Post",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Will of Fire and the Shadows (Revised)\",\n  \"content\": \"Revised content: People live their lives bound by what they accept as correct and true. That is how they define reality.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Update author's own post. Editing approved post resets status to 'pending' to require admin re-review."
+          }
+        },
+        {
+          "name": "Delete My Post",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["posts", "{{postId}}"]
+            },
+            "description": "Delete author's own post."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Admin Post Approval",
+      "item": [
+        {
+          "name": "Get Pending Posts (Admin Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/posts/pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "posts", "pending"]
+            },
+            "description": "Admin endpoint to view all posts awaiting approval."
+          }
+        },
+        {
+          "name": "Approve Post (Admin Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/posts/approve/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "posts", "approve", "{{postId}}"]
+            },
+            "description": "Admin approves pending post. Status becomes 'approved' and post is made public."
+          }
+        },
+        {
+          "name": "Reject Post (Admin Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/posts/reject/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "posts", "reject", "{{postId}}"]
+            },
+            "description": "Admin rejects pending post. Status becomes 'rejected' and post remains hidden from public."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. AI Content Improvement",
+      "item": [
+        {
+          "name": "Improve Content with Gemini AI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ai/improve/{{postId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["ai", "improve", "{{postId}}"]
+            },
+            "description": "Uses Google Gemini AI to improve author's post. Creates a NEW draft document with a NEW ID and status: 'draft', while preserving the original post 100% unchanged."
+          }
+        }
+      ]
+    }
+  ]
+}
